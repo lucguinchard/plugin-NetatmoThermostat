@@ -1,0 +1,2 @@
+# plugin-netatmoThermostat
+# plugin-NetatmoThermostat
