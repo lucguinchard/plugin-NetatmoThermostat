@@ -71,10 +71,10 @@
 						$('.eqLogic[data-eqLogic_uid=#uid#] .planning').append('Manuel <i class="fa fa-arrow-right"></i> #endtime#');
 						$('.eqLogic[data-eqLogic_uid=#uid#] .planning').css('display', 'block');
 					}
-					if (#consigne#>#temperature#) {
+					if (parseFloat('#consigne#')>parseFloat('#temperature#')) {
 							$('.eqLogic[data-eqLogic_uid=#uid#] .chaudiere').css('color', 'white');
 					}
-					if (#anticipation# == 1) {
+					if ('#anticipation#' === '1') {
 							$('.eqLogic[data-eqLogic_uid=#uid#] .anticipation').css('display', 'white');
 					}
                 </script>
