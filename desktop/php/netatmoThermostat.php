@@ -34,7 +34,7 @@ if (count($eqLogics) == 0) {
 foreach ($eqLogics as $eqLogic) {
 	$opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
         echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
-        echo '<img src="' . $plugin->getPathImgIcon() . '"/>';
+        echo '<img src="plugins/netatmoThermostat/core/img/NAMain.png"/>';
         echo "<br/>";
         echo '<span>' . $eqLogic->getHumanName(true, true) . '</span>';
         echo '</div>';
@@ -116,7 +116,7 @@ foreach (jeeObject::all() as $object) {
 </div>
 <div class="col-sm-6">
   <center>
-    <img src="plugins/netatmoThermostat/docs/images/thermostat.png" style="height : 400px;" />
+    <img src="plugins/netatmoThermostat/core/img/NAMain.png" style="height : 200px;" />
   </center>
 </div>
 </div>
