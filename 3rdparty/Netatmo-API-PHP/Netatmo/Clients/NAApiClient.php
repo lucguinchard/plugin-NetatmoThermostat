@@ -1,18 +1,20 @@
 <?php
-require_once (dirname(__FILE__).'/../Constants/AppliCommonPublic.php');
-require_once (dirname(__FILE__).'/../Exceptions/NASDKException.php');
-require_once (dirname(__FILE__).'/../Exceptions/NAClientException.php');
 
-define('CURL_ERROR_TYPE', 0);
-define('API_ERROR_TYPE',1);//error return from api
-define('INTERNAL_ERROR_TYPE', 2); //error because internal state is not consistent
-define('JSON_ERROR_TYPE',3);
-define('NOT_LOGGED_ERROR_TYPE', 4); //unable to get access token
+namespace Netatmo\Clients;
 
-define('BACKEND_BASE_URI', "https://api.netatmo.net/");
-define('BACKEND_SERVICES_URI', "https://api.netatmo.net/api");
-define('BACKEND_ACCESS_TOKEN_URI', "https://api.netatmo.net/oauth2/token");
-define('BACKEND_AUTHORIZE_URI', "https://api.netatmo.net/oauth2/authorize");
+use Netatmo\Exceptions\NASDKException;
+use Netatmo\Exceptions\NAClientException;
+use Netatmo\Exceptions\NAApiErrorType;
+use Netatmo\Exceptions\NACurlErrorType;
+use Netatmo\Exceptions\NAJsonErrorType;
+use Netatmo\Exceptions\NAInternalErrorType;
+use Netatmo\Exceptions\NANotLoggedErrorType;
+use Netatmo\Common\NARestErrorCode;
+
+define('BACKEND_BASE_URI', "https://api.netatmo.com/");
+define('BACKEND_SERVICES_URI', "https://api.netatmo.com/api");
+define('BACKEND_ACCESS_TOKEN_URI', "https://api.netatmo.com/oauth2/token");
+define('BACKEND_AUTHORIZE_URI', "https://api.netatmo.com/oauth2/authorize");
 
 
 /**
@@ -28,6 +30,7 @@ class NAApiClient
     protected $conf = array();
     protected $refresh_token;
     protected $access_token;
+    protected $expires_at;
     /**
    * Returns a persistent variable.
    *
@@ -98,6 +101,10 @@ class NAApiClient
             $this->refresh_token = $value["refresh_token"];
             $update = true;
         }
+        if(isset($value["expires_in"]))
+        {
+            $this->expires_at = time() + $value["expires_in"] - 30;
+        }
         if(isset($update)) $this->updateSession();
     }
 
@@ -106,7 +113,7 @@ class NAApiClient
     **/
     public function setTokensFromStore($value)
     {
-         if(isset($value["access_token"]))
+        if(isset($value["access_token"]))
             $this->access_token = $value["access_token"];
         if(isset($value["refresh_token"]))
             $this->refresh_token = $value["refresh_token"];
@@ -115,6 +122,7 @@ class NAApiClient
     {
         $this->access_token = null;
         $this->refresh_token = null;
+        $this->expires_at = null;
     }
     /**
     * Initialize a NA OAuth2.0 Client.
@@ -156,6 +164,18 @@ class NAApiClient
             {
                 $this->setVariable($key, $val);
             }
+        }
+
+        if(isset($config['scope']) && is_array($config['scope']))
+        {
+            foreach($config['scope'] as $scope)
+            {
+                trim($scope);
+            }
+
+            $scope = implode(' ', $config['scope']);
+            $this->setVariable('scope', $scope);
+            unset($config['scope']);
         }
 
         // Other else configurations.
@@ -208,6 +228,12 @@ class NAApiClient
         $opts = self::$CURL_OPTS;
         if ($params)
         {
+            if(isset($params['access_token']))
+            {
+                $opts[CURLOPT_HTTPHEADER][] = 'Authorization: Bearer ' . $params['access_token'];
+                unset($params['access_token']);
+            }
+
             switch ($method)
             {
                 case 'GET':
@@ -306,14 +332,28 @@ class NAApiClient
     public function getAccessToken()
     {
         //find best way to retrieve access_token
-        if($this->access_token) return array("access_token" => $this->access_token);
+        if($this->access_token)
+        {
+            if(!is_null($this->expires_at) && $this->expires_at < time()) // access_token expired.
+            {
+                if($this->refresh_token)
+                {
+                    return $this->getAccessTokenFromRefreshToken($this->refresh_token);//exception will be thrown otherwise
+                }
+                else
+                {
+                    throw new NAInternalErrorType("Access token expired");
+                }
+            }
+            return array("access_token" => $this->access_token);
+        }
         if($this->getVariable('code'))// grant_type == authorization_code.
         {
             return $this->getAccessTokenFromAuthorizationCode($this->getVariable('code'));
         }
         else if($this->refresh_token)// grant_type == refresh_token
         {
-            return $this->getAccessTokenFromRefreshToken($this->refresh_token);
+            return $this->getAccessTokenFromRefreshToken();
         }
         else if($this->getVariable('username') && $this->getVariable('password'))  //grant_type == password
         {
