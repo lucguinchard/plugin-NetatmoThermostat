@@ -402,17 +402,17 @@ class netatmoThermostat extends eqLogic {
 						break;
 					case 'statusname':
 						if ($mode == 'away') {
-							$value = 'Jusqu\'à ' . $setpointmode_endtime;
+							$value = 'Jusqu’à ' . $setpointmode_endtime;
 						} else if ($mode == 'hg') {
-							$value = 'Jusqu\'à ' . $setpointmode_endtime;
+							$value = 'Jusqu’à ' . $setpointmode_endtime;
 						} else if ($mode == 'max') {
-							$value = 'Jusqu\'à ' . $setpointmode_endtime;
+							$value = 'Jusqu’à ' . $setpointmode_endtime;
 						} else if ($mode == 'program') {
 							$value = $planning . ' -> ' . $nextplanning . ' ' . $setpointmode_endtime;
 						} else if ($mode == 'off') {
 							$value = 'Eteint';
 						} else {
-							$value = 'Jusqu\'à ' . $setpointmode_endtime;
+							$value = 'Jusqu’à ' . $setpointmode_endtime;
 						}
 						break;
 				}
@@ -994,7 +994,7 @@ class netatmoThermostatCmd extends cmd {
 					$eqLogic->changemodeTherm($eqLogic->getLogicalId(), $mode, $timestamp);
 					break;
 				default:
-					log::add('netatmoThermostat', 'debug', 'Vous n\'êtes pas dans un mode pour lequel une durée peut être définie');
+					log::add('netatmoThermostat', 'debug', 'Vous n’êtes pas dans un mode pour lequel une durée peut être définie');
 					break;
 			}
 		} elseif ($action == 'calendarset') {
