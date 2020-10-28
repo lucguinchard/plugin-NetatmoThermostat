@@ -18,9 +18,10 @@
 
 /* * ***************************Includes********************************* */
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-if (!class_exists('NAThermApiClient')) {
-	require_once dirname(__FILE__) . '/../../3rdparty/Netatmo-API-PHP/Clients/NAThermApiClient.php';
-}
+require_once dirname(__FILE__) . '/../../3rdparty/Netatmo-API-PHP/Netatmo/autoload.php';
+
+use Netatmo\Clients\NAThermApiClient;
+use Netatmo\Common\NAScopes;
 
 class netatmoThermostat extends eqLogic {
 	/*     * *************************Attributs****************************** */
