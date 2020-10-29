@@ -30,7 +30,7 @@ class netatmoThermostat extends eqLogic {
 	/*	 * ***********************Methode static*************************** */
 	public static $_widgetPossibility = array('custom' => true);
 
-	public function getClient() {
+	public static function getClient() {
 		if (self::$_client == null) {
 			self::$_client = new NAThermApiClient(array(
 				'client_id' => config::byKey('client_id', 'netatmoThermostat'),
@@ -49,7 +49,7 @@ class netatmoThermostat extends eqLogic {
 		return self::$_client;
 	}
 
-	public function getFromWelcome() {
+	public static function getFromWelcome() {
 		$client_id = config::byKey('client_id', 'netatmoWelcome');
 		$client_secret = config::byKey('client_secret', 'netatmoWelcome');
 		$username = config::byKey('username', 'netatmoWelcome');
@@ -57,7 +57,7 @@ class netatmoThermostat extends eqLogic {
 		return (array($client_id, $client_secret, $username, $password));
 	}
 
-	public function getFromWeather() {
+	public static function getFromWeather() {
 		$client_id = config::byKey('client_id', 'netatmoWeather');
 		$client_secret = config::byKey('client_secret', 'netatmoWeather');
 		$username = config::byKey('username', 'netatmoWeather');
@@ -122,8 +122,7 @@ class netatmoThermostat extends eqLogic {
 		$this->syncWithTherm($multiId, null, $scheduleid);
 	}
 
-	//fin modif
-	public function getLastMesure($multiId = null) {
+	public static function getLastMesure($multiId = null) {
 		if ($multiId != null) {
 			$eqLogics[] = eqLogic::byLogicalId($multiId, 'netatmoThermostat');
 		} else {
@@ -144,8 +143,7 @@ class netatmoThermostat extends eqLogic {
 		return $thermmeasure;
 	}
 
-	//fin modif
-	public function syncWithTherm($multiId = null, $forcedSetpoint = null, $scheduleid = null) {
+	public static function syncWithTherm($multiId = null, $forcedSetpoint = null, $scheduleid = null) {
 		if ($multiId !== null) {
 			$ids = explode('|', $multiId);
 			$deviceid = $ids[0];
@@ -170,7 +168,6 @@ class netatmoThermostat extends eqLogic {
 				continue;
 			}
 
-			//Modif Limad44
 			$thermmeasure = self::getLastMesure($multiId);
 
 			//$temperature_thermostat = $thermostat["modules"][0]["measured"]["temperature"];
@@ -423,7 +420,7 @@ class netatmoThermostat extends eqLogic {
 		}
 	}
 
-	public function syncWithNetatmo() {
+	public static function syncWithNetatmo() {
 		$client = self::getClient();
 		$devicelist = $client->getData();
 		log::add('netatmoThermostat', 'debug', print_r($devicelist, true));
